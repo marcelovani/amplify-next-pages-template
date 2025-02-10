@@ -18,6 +18,7 @@ const schema = a.schema({
       email: a.email().authorization((allow) => allow.owner()),
       companyId: a.id(),
       company: a.belongsTo('Company', ['companyId']),
+      groupChats: a.hasMany('GroupChat', ['groupChatId']),
     })
     .authorization((allow) => [
       allow.authenticated().to(['read']),
