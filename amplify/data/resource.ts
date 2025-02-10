@@ -6,7 +6,6 @@ const schema = a.schema({
       name: a.string().required(),
       domains: a.email().authorization((allow) => allow.owner()),
       users: a.hasMany('User', ['companyId']),
-      groups: a.hasMany('Group', ['companyId']),
       groupChats: a.hasMany('GroupChat', ['companyId']),
     })
     .authorization((allow) => [
@@ -19,23 +18,12 @@ const schema = a.schema({
       email: a.email().authorization((allow) => allow.owner()),
       companyId: a.id(),
       company: a.belongsTo('Company', ['companyId']),
-      groups: a.hasMany('Group', ['userId']),
-      groupChats: a.hasMany('GroupChat', ['userId']),
+      groupChats: a.hasMany('GroupChat', ['groupChatId']),
     })
     .authorization((allow) => [
       allow.authenticated().to(['read']),
       allow.owner(),
     ]),
-  Group: a
-    .model({
-      groupId: a.id().required(),
-      name: a.string().required().default('New Group'),
-      companyId: a.id(),
-      company: a.belongsTo('Company', ['companyId']),
-      userId: a.id(),
-      user: a.belongsTo('User', ['userId']),
-    })
-    .identifier(['groupId', 'name']),
   GroupChat: a
     .model({
       name: a.string().default('New GroupChat'),
@@ -43,8 +31,6 @@ const schema = a.schema({
       company: a.belongsTo('Company', ['companyId']),
       userId: a.id(),
       user: a.belongsTo('User', ['userId']),
-      groupId: a.id(),
-      group: a.belongsTo('Group', ['groupId']),
     })
     .authorization((allow) => [
       allow.publicApiKey().to(['read']),
@@ -53,8 +39,6 @@ const schema = a.schema({
   Message: a
     .model({
       content: a.string(),
-      companyId: a.id(),
-      company: a.belongsTo('Company', ['companyId']),
       userId: a.id(),
       user: a.belongsTo('User', ['userId']),
       groupChatId: a.id(),
