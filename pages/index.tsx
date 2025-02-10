@@ -7,7 +7,6 @@ const client = generateClient<Schema>();
 export default function App() {
   const [companies, setCompanies] = useState<Array<Schema["Company"]["type"]>>([]);
   const [users, setUsers] = useState<Array<Schema["User"]["type"]>>([]);
-  const [groups, setGroups] = useState<Array<Schema["Group"]["type"]>>([]);
   const [groupChats, setGroupChats] = useState<Array<Schema["GroupChat"]["type"]>>([]);
   const [messages, setMessages] = useState<Array<Schema["Message"]["type"]>>([]);
   
@@ -20,12 +19,6 @@ export default function App() {
   function listUsers() {
     client.models.User.observeQuery().subscribe({
       next: (data) => setUsers([...data.items]),
-    });
-  }
-
-  function listGroups() {
-    client.models.Group.observeQuery().subscribe({
-      next: (data) => setGroups([...data.items]),
     });
   }
 
