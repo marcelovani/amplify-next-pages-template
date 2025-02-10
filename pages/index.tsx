@@ -5,30 +5,58 @@ import type { Schema } from "@/amplify/data/resource";
 const client = generateClient<Schema>();
 
 export default function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  const [companies, setCompanies] = useState<Array<Schema["Company"]["type"]>>([]);
+  const [users, setUsers] = useState<Array<Schema["User"]["type"]>>([]);
+  const [groups, setGroups] = useState<Array<Schema["Group"]["type"]>>([]);
+  const [groupChats, setGroupChats] = useState<Array<Schema["GroupChat"]["type"]>>([]);
+  const [messages, setMessages] = useState<Array<Schema["Message"]["type"]>>([]);
+  
+  function listCompanies() {
+    client.models.Company.observeQuery().subscribe({
+      next: (data) => setCompanies([...data.items]),
+    });
+  }
 
-  function listTodos() {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
+  function listUsers() {
+    client.models.User.observeQuery().subscribe({
+      next: (data) => setUsers([...data.items]),
+    });
+  }
+
+  function listGroups() {
+    client.models.Group.observeQuery().subscribe({
+      next: (data) => setGroups([...data.items]),
+    });
+  }
+
+  function listGroupChats() {
+    client.models.GroupChat.observeQuery().subscribe({
+      next: (data) => setGroupChats([...data.items]),
+    });
+  }
+
+  function listMessages() {
+    client.models.Message.observeQuery().subscribe({
+      next: (data) => setMessages([...data.items]),
     });
   }
 
   useEffect(() => {
-    listTodos();
+    listMessages();
   }, []);
 
-  function createTodo() {
-    client.models.Todo.create({
-      content: window.prompt("Todo content"),
+  function createMessage() {
+    client.models.Message.create({
+      content: window.prompt("Message"),
     });
   }
 
   return (
     <main>
       <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
+      <button onClick={createMessage}>+ new</button>
       <ul>
-        {todos.map((todo) => (
+        {messages.map((todo) => (
           <li key={todo.id}>{todo.content}</li>
         ))}
       </ul>

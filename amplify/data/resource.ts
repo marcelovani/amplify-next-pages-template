@@ -1,18 +1,70 @@
 import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
-/*== STEP 1 ===============================================================
-The section below creates a Todo database table with a "content" field. Try
-adding a new "isDone" field as a boolean. The authorization rule below
-specifies that any user authenticated via an API key can "create", "read",
-"update", and "delete" any "Todo" records.
-=========================================================================*/
 const schema = a.schema({
-  Todo: a
+  Company: a
+    .model({
+      name: a.string().required(),
+      domains: a.email().authorization((allow) => allow.owner()),
+      users: a.hasMany('User', ['companyId']),
+      groups: a.hasMany('Group', ['companyId']),
+      groupChats: a.hasMany('GroupChat', ['companyId']),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(['read']),
+      allow.owner(),
+    ]),
+  User: a
+    .model({
+      name: a.string().required(),
+      email: a.email().authorization((allow) => allow.owner()),
+      companyId: a.id(),
+      company: a.belongsTo('Company', ['companyId']),
+      groups: a.hasMany('Group', ['userId']),
+      groupChats: a.hasMany('GroupChat', ['userId']),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(['read']),
+      allow.owner(),
+    ]),
+  Group: a
+    .model({
+      groupId: a.id().required(),
+      name: a.string().required().default('New Group'),
+      companyId: a.id(),
+      company: a.belongsTo('Company', ['companyId']),
+      userId: a.id(),
+      user: a.belongsTo('User', ['userId']),
+    })
+    .identifier(['groupId', 'name']),
+  GroupChat: a
+    .model({
+      name: a.string().default('New GroupChat'),
+      companyId: a.id(),
+      company: a.belongsTo('Company', ['companyId']),
+      userId: a.id(),
+      user: a.belongsTo('User', ['userId']),
+      groupId: a.id(),
+      group: a.belongsTo('Group', ['groupId']),
+    })
+    .authorization((allow) => [
+      allow.publicApiKey().to(['read']),
+      allow.owner(),
+    ]),
+  Message: a
     .model({
       content: a.string(),
+      companyId: a.id(),
+      company: a.belongsTo('Company', ['companyId']),
+      userId: a.id(),
+      user: a.belongsTo('User', ['userId']),
+      groupChatId: a.id(),
+      groupChat: a.belongsTo('GroupChat', ['groupChatId']),
     })
-    .authorization((allow) => [allow.publicApiKey()]),
-});
+    .authorization((allow) => [
+      allow.publicApiKey().to(['read']),
+      allow.owner(),
+    ]),
+  }).authorization((allow) => allow.publicApiKey());
 
 export type Schema = ClientSchema<typeof schema>;
 
@@ -52,6 +104,6 @@ Fetch records from the database and use them in your frontend component.
 
 /* For example, in a React component, you can use this snippet in your
   function's RETURN statement */
-// const { data: todos } = await client.models.Todo.list()
+// const { data: groups } = await client.models.Group.list()
 
-// return <ul>{todos.map(todo => <li key={todo.id}>{todo.content}</li>)}</ul>
+// return <ul>{groups.map(group => <li key={group.id}>{group.content}</li>)}</ul>
