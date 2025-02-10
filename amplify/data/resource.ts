@@ -30,6 +30,7 @@ const schema = a.schema({
       company: a.belongsTo('Company', ['companyId']),
       userId: a.id(),
       user: a.belongsTo('User', ['userId']),
+      messages: a.hasMany('Message', ['groupChatId']),
     })
     .authorization((allow) => [
       allow.publicApiKey().to(['read']),
